@@ -1,0 +1,27 @@
+deployment:
+  admin:
+    admin_key_required: true
+    admin_api_version: v3
+    enable_admin_cors: true
+    admin_listen:
+      ip: 0.0.0.0
+      port: 9180
+    admin_key:
+    - key: edd1c9f034335f136f87ad84b625c8f1
+      name: admin
+      role: admin
+    allow_admin:
+    - 0.0.0.0/0
+    enable_admin_ui: true
+  etcd:
+    prefix: /apisix
+    host:
+      - http://etcd:2379
+    timeout: 30
+    watch_timeout: 50
+    startup_retry: 2
+    tls:
+      verify: false
+  nginx_config:
+    error_log_level: info
+

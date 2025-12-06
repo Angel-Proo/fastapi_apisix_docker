@@ -1,0 +1,95 @@
+version: "3.9"
+
+services:
+
+  # ============================
+  # ETCD
+  # ============================
+  etcd:
+    image: gcr.io/etcd-development/etcd:v3.5.12
+    container_name: etcd
+    command:
+      - /usr/local/bin/etcd
+      - --name=etcd0
+      - --data-dir=/etcd-data
+      - --advertise-client-urls=http://etcd:2379
+      - --listen-client-urls=http://0.0.0.0:2379
+      - --listen-peer-urls=http://0.0.0.0:2380
+      - --initial-advertise-peer-urls=http://etcd:2380
+      - --initial-cluster=etcd0=http://etcd:2380
+      - --initial-cluster-token=etcd-cluster
+      - --initial-cluster-state=new
+    volumes:
+      - ./etcd-data:/etcd-data
+    ports:
+      - "2379:2379"
+    networks:
+      - apisix-network
+
+  # ============================
+  # APISIX
+  # ============================
+  apisix:
+    image: apache/apisix:latest
+    container_name: apisix
+    depends_on:
+      - etcd
+    ports:
+      - "9080:9080"
+      - "9443:9443"
+      - "9180:9180"
+    volumes:
+      - ./apisix/conf/config.yaml:/usr/local/apisix/conf/config.yaml
+    networks:
+      - apisix-network
+
+  # ============================
+  # APISIX DASHBOARD
+  # ============================
+  apisix-dashboard:
+    image: apache/apisix-dashboard:latest
+    container_name: apisix-dashboard
+    depends_on:
+      - etcd
+      - apisix
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./dashboard/conf.yaml:/usr/local/apisix-dashboard/conf/conf.yaml
+    environment:
+      ETCD_HOST: http://etcd:2379
+      APISIX_ADMIN_KEY: edd1c9f034335f136f87ad84b625c8f1
+    networks:
+      - apisix-network
+
+  # ============================
+  # Microservicio: PRODUCTOS
+  # ============================
+  productos-service:
+    build: ./productos
+    container_name: productos-service
+    ports:
+      - "8000:80"
+    volumes:
+      - ./productos/app:/code/app
+      #- ./productos/productos.db:/code/productos.db
+    networks:
+      - apisix-network
+
+  # ============================
+  # Microservicio: CLIENTES
+  # ============================
+  clientes-service:
+    build: ./clientes
+    container_name: clientes-service
+    ports:
+      - "8001:80"
+    volumes:
+      - ./clientes/app:/code/app
+      #- ./clientes/clientes.db:/code/clientes.db
+    networks:
+      - apisix-network
+
+networks:
+  apisix-network:
+    driver: bridge
