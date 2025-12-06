@@ -22,10 +22,10 @@ graph TD
     Client[👤 Cliente / Navegador]:::client
     
     subgraph Docker_Host ["🐳 Docker Host (Tu Servidor)"]
-        style Docker_Host fill:#f5f5f5,stroke:#333,stroke-width:2px
+        style Docker_Host fill:#573131,stroke:#333,stroke-width:2px
         
         subgraph Docker_Network ["🌐 Red Docker (apisix-network)"]
-            style Docker_Network fill:#fff,stroke:#999,stroke-dasharray: 5 5
+            style Docker_Network fill:#991B1B,stroke:#999,stroke-dasharray: 5 5
 
             Gateway["🚦 APISIX Gateway<br>9080 (Traffic)<br>9180 (Admin API)"]:::gateway
             Dashboard["🖥️ APISIX Dashboard<br>9000 UI"]:::service
