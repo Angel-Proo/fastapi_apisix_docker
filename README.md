@@ -10,6 +10,47 @@ Este proyecto implementa una arquitectura de microservicios contenerizada utiliz
 *   **`dashboard/`**: Configuración del Dashboard de administración web para APISIX.
 *   **`docker-compose.yml`**: Definición de la infraestructura completa.
 
+## 🏛️ Arquitectura
+
+```mermaid
+graph TD
+    classDef client fill:#792579,stroke:#333,stroke-width:2px;
+    classDef gateway fill:#94945A,stroke:#333,stroke-width:2px;
+    classDef db fill:#8989B8,stroke:#333,stroke-width:2px;
+    classDef service fill:#76A176,stroke:#333,stroke-width:2px;
+
+    Client[👤 Cliente / Navegador]:::client
+    
+    subgraph Docker_Host ["🐳 Docker Host (Tu Servidor)"]
+        style Docker_Host fill:#f5f5f5,stroke:#333,stroke-width:2px
+        
+        subgraph Docker_Network ["🌐 Red Docker (apisix-network)"]
+            style Docker_Network fill:#fff,stroke:#999,stroke-dasharray: 5 5
+
+            Gateway["🚦 APISIX Gateway<br>9080 (Traffic)<br>9180 (Admin API)"]:::gateway
+            Dashboard["🖥️ APISIX Dashboard<br>9000 UI"]:::service
+            Etcd["🗄️ Etcd<br>Config Store<br>2379"]:::db
+            
+            subgraph Microservices ["📦 Microservicios"]
+                direction LR
+                Productos["🛒 Productos<br>FastAPI<br>80"]:::service
+                Clientes["👥 Clientes<br>FastAPI<br>80"]:::service
+            end
+        end
+    end
+
+    Client --> |Peticiones API| Gateway
+    Client -.-> |Admin UI| Dashboard
+
+    Dashboard --> |Guarda configs| Etcd
+    Dashboard --> |Admin API| Gateway
+
+    Gateway --> |/productos/*| Productos
+    Gateway --> |/clientes/*| Clientes
+
+    Gateway <--> |Config runtime| Etcd
+```
+
 ## 🚀 Inicio Rápido
 
 ### Prerrequisitos
